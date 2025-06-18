@@ -1,0 +1,270 @@
+"use client";
+
+import React, { useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { Product } from "@/interfaces/product";
+import Swal from "sweetalert2";
+import { validateProductDetails } from "@/utlis/validation/details";
+import QuillWrapper from "@/components/common/QuillWrapper";
+import "react-quill-new/dist/quill.snow.css";
+
+interface DescriptionsProps {
+  productProp: Product;
+  updateProduct: (data: Product) => void;
+  handleNextStep: () => void;
+}
+
+const Descriptions: React.FC<DescriptionsProps> = ({
+  productProp,
+  updateProduct,
+  handleNextStep,
+}) => {
+  // Initialize specifications as a Map, converting plain object if needed
+  const initialSpecifications: Map<string, string> =
+    productProp.specifications instanceof Map
+      ? new Map(
+          Array.from(productProp.specifications.entries()).map(([k, v]) => [
+            k,
+            String(v),
+          ]),
+        )
+      : new Map(
+          Object.entries(productProp.specifications || {}).map(([k, v]) => [
+            k,
+            String(v),
+          ]),
+        );
+  const [productState, setProductState] = useState<Product>({
+    ...productProp,
+    details: {
+      ingredientsDescription: productProp.details?.ingredientsDescription || "",
+      additionalDescription: productProp.details?.additionalDescription || "",
+    },
+    specifications: initialSpecifications,
+  });  const [newSpecKey, setNewSpecKey] = useState("");
+  const [newSpecValue, setNewSpecValue] = useState("");
+
+  const handleIngredientsDescriptionChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>,
+  ) => {
+    const updatedProduct = {
+      ...productState,
+      details: {
+        ...productState.details,
+        ingredientsDescription: e.target.value,
+      },
+    };
+    setProductState(updatedProduct);
+    updateProduct(updatedProduct);
+  };
+
+  const handleAdditionalDescriptionChange = (value: string) => {
+    const updatedProduct = {
+      ...productState,
+      details: {
+        ...productState.details,
+        additionalDescription: value,
+      },
+    };
+    setProductState(updatedProduct);
+    updateProduct(updatedProduct);  };
+
+  const handleAddSpecification = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newSpecKey?.trim()) {
+      Swal.fire({
+        title: "Error",
+        text: "Specification key is required.",
+        icon: "error",
+      });
+      return;
+    }
+
+    if (!(productState.specifications instanceof Map)) {
+      Swal.fire({
+        title: "Error",
+        text: "Invalid specifications format.",
+        icon: "error",
+      });
+      return;
+    }
+
+    if (productState.specifications.has(newSpecKey)) {
+      Swal.fire({
+        title: "Error",
+        text: "Specification key already exists.",
+        icon: "error",
+      });
+      return;
+    }
+
+    const updatedSpecifications = new Map(productState.specifications).set(
+      newSpecKey,
+      newSpecValue,
+    );
+    const updatedProduct = {
+      ...productState,
+      specifications: updatedSpecifications,
+    };
+    setProductState(updatedProduct);
+    updateProduct(updatedProduct);
+    setNewSpecKey("");
+    setNewSpecValue("");
+  };
+
+  const handleRemoveSpecification = (key: string) => {
+    if (!(productState.specifications instanceof Map)) {
+      Swal.fire({
+        title: "Error",
+        text: "Invalid specifications format.",
+        icon: "error",
+      });
+      return;
+    }
+
+    const updatedSpecifications = new Map(productState.specifications);
+    updatedSpecifications.delete(key);
+    const updatedProduct = {
+      ...productState,
+      specifications: updatedSpecifications,
+    };
+    setProductState(updatedProduct);
+    updateProduct(updatedProduct);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const { isValid, errors } = validateProductDetails(productState);
+
+    if (!isValid) {
+      Swal.fire({
+        title: "Validation Error",
+        html: errors.join("<br>"),
+        icon: "error",
+      });
+      return;
+    }
+
+    updateProduct(productState);
+    handleNextStep();
+  };
+
+  return (
+    <div className="rounded-lg border p-4 shadow-md">
+      <h2 className="mb-4 text-xl font-semibold">Step 2: Product Details</h2>
+      <form onSubmit={handleSubmit}>
+        <div className="px-6.5">
+          <div className="mb-6">
+            <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+              Ingredients Description
+            </label>
+            <textarea
+              value={productState.details.ingredientsDescription}
+              onChange={handleIngredientsDescriptionChange}
+              rows={6}
+              placeholder="Enter ingredients description"
+              className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            ></textarea>
+          </div>
+
+          <div className="mb-6">
+            <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+              Additional Description
+            </label>            <QuillWrapper
+              value={productState.details.additionalDescription || ""}
+              onChange={handleAdditionalDescriptionChange}
+              placeholder="Enter additional description with rich text formatting..."
+              style={{
+                backgroundColor: "transparent",
+                border: "1.5px solid #e2e8f0",
+                borderRadius: "6px",
+              }}
+              modules={{
+                toolbar: [
+                  [{ header: [1, 2, 3, false] }],
+                  ["bold", "italic", "underline", "strike"],
+                  [{ list: "ordered" }, { list: "bullet" }],
+                  ["link"],
+                  ["clean"],
+                ],
+              }}              formats={[
+                "header",
+                "bold",
+                "italic",
+                "underline",
+                "strike",
+                "list",
+                "link",
+              ]}
+            />
+          </div>
+
+          <div className="mb-6">
+            <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+              Specifications
+            </label>
+            <div className="mb-4 flex gap-2">
+              <input
+                type="text"
+                value={newSpecKey}
+                onChange={(e) => setNewSpecKey(e.target.value)}
+                placeholder="Sugar"
+                className="w-1/3 rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+              />
+              <input
+                type="text"
+                value={newSpecValue}
+                onChange={(e) => setNewSpecValue(e.target.value)}
+                placeholder="0.5g"
+                className="w-1/3 rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+              />
+              <button
+                role="button"
+                type="button"
+                onClick={handleAddSpecification}
+                className="w-1/3 rounded bg-blue-700 p-3 text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              >
+                Add
+              </button>
+            </div>
+            <div className="mb-6 flex flex-wrap gap-2">
+              {productState.specifications instanceof Map &&
+                Array.from(productState.specifications.entries()).map(
+                  ([key, value], index) => (
+                    <span
+                      key={index}
+                      id={`badge-dismiss-${index}`}
+                      className="inline-flex items-center rounded-sm bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+                    >
+                      {key}: {value}
+                      <button
+                        type="button"
+                        className="rounded-xs ms-2 inline-flex items-center bg-transparent p-1 text-sm text-blue-400 hover:bg-blue-200 hover:text-blue-900 dark:hover:bg-blue-800 dark:hover:text-blue-300"
+                        data-dismiss-target={`#badge-dismiss-${index}`}
+                        aria-label="Remove"
+                        onClick={() => handleRemoveSpecification(key)}
+                      >
+                        <FontAwesomeIcon icon={faXmark} className="h-3 w-3" />
+                        <span className="sr-only">Remove specification</span>
+                      </button>
+                    </span>
+                  ),
+                )}            </div>
+          </div>
+
+        {/* <div className="px-6.5">
+            <button
+              type="submit"
+              className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+            >
+              Next
+            </button>
+          </div> */}
+        </div>
+      </form>
+    </div>
+  );
+};
+
+export default Descriptions;
