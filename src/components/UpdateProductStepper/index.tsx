@@ -67,7 +67,7 @@ const UpdateProductStepper: React.FC<UpdateProductStepperProps> = ({
       setProduct(null);
       setCurrentStep(1);
     }
-  }, [isSuccess]);
+  }, [isSuccess, router]);
 
   const nextStep = () => {
     if (currentStep < 2) setCurrentStep(currentStep + 1);
