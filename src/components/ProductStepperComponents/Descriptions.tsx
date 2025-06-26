@@ -57,48 +57,38 @@ const Descriptions: React.FC<DescriptionsProps> = ({
   };
 
    const handleAddSpecification = (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!newSpecKey?.trim()) {
-        Swal.fire({
-          title: "Error",
-          text: "Specification key is required.",
-          icon: "error",
-        });
-        return;
-      }
-  
-      if (!(productState.specifications instanceof Map)) {
-        Swal.fire({
-          title: "Error",
-          text: "Invalid specifications format.",
-          icon: "error",
-        });
-        return;
-      }
-  
-      if (productState.specifications.has(newSpecKey)) {
-        Swal.fire({
-          title: "Error",
-          text: "Specification key already exists.",
-          icon: "error",
-        });
-        return;
-      }
-  
-      const updatedSpecifications = new Map(productState.specifications).set(
-        newSpecKey,
-        newSpecValue,
-      );
-      const updatedProduct = {
-        ...productState,
-        specifications: updatedSpecifications,
-      };
-      setProductState(updatedProduct);
-      updateProduct(updatedProduct);
-      setNewSpecKey("");
-      setNewSpecValue("");
+    console.log("handle add");
+
+    e.preventDefault();
+    if (!newSpecKey?.trim()) {
+      Swal.fire({
+        title: "Error",
+        text: "Specification key is required.",
+        icon: "error",
+      });
+      return;
+    }
+    if (productState.specifications.has(newSpecKey)) {
+      Swal.fire({
+        title: "Error",
+        text: "Specification key already exists.",
+        icon: "error",
+      });
+      return;
+    }    const updatedSpecifications = new Map(productState.specifications).set(
+      newSpecKey.trim(),
+      newSpecValue.trim(),
+    );
+    const updatedProduct = {
+      ...productState,
+      specifications: updatedSpecifications,
     };
-  
+    setProductState(updatedProduct);
+    updateProduct(updatedProduct);
+    setNewSpecKey("");
+    setNewSpecValue("");
+  };
+
   const handleRemoveSpecification = (key: string) => {
     const updatedSpecifications = new Map(productState.specifications);
     updatedSpecifications.delete(key);
@@ -127,7 +117,6 @@ const Descriptions: React.FC<DescriptionsProps> = ({
     updateProduct(productState);
     handleNextStep();
   };
-
   return (
     <div className="rounded-lg border p-4 shadow-md">
       <h2 className="mb-4 text-xl font-semibold">Step 2: Product Details</h2>
@@ -177,8 +166,7 @@ const Descriptions: React.FC<DescriptionsProps> = ({
               ]}
             />
           </div>
-
-          <div className="px-6.5">
+ <div className="px-6.5">
             <label className="mb-3 block text-sm font-medium text-black dark:text-white">
               Specifications
             </label>

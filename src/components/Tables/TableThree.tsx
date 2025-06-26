@@ -31,8 +31,7 @@ const TableThree = () => {
     limit: itemsPerPage,
   });
 
-  const [deleteProduct, { isLoading: isDeleting, isSuccess }] =
-    useDeleteProductMutation();
+  const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
 
   if (isLoading) {
     return <Spinner />;
@@ -42,7 +41,6 @@ const TableThree = () => {
     return <p>Failed to load products.</p>;
   }
 
-  // Check if no products are found
   if (!data?.allProducts || data.allProducts.length === 0) {
     return (
       <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
@@ -120,17 +118,18 @@ const TableThree = () => {
             </tr>
           </thead>
           <tbody>
-            {data?.allProducts?.map((product: Product, key: number) => (
-              <tr key={key}>
+            {data?.allProducts?.map((product: Product, index: number) => (
+              <tr key={product._id?.toString() ?? `product-${index}`}>
                 <td className="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
                   <h5 className="font-medium text-black dark:text-white">
                     {product.name}
                   </h5>
                 </td>
                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-                  <div className="flex  flex-wrap gap-3">                    {product.variants.map((variant, variantIndex) => (
+                  <div className="flex flex-wrap gap-3">
+                    {product.variants.map((variant) => (
                       <div
-                        key={`${product._id}-variant-${variantIndex}`}
+                        key={`${product._id}-${variant.size}-${variant.offer}`}
                         className="shadow-xs inline-flex rounded-md"
                         role="group"
                       >
@@ -179,7 +178,10 @@ const TableThree = () => {
                   </Link>
                   <button
                     onClick={() => openDeleteModal(product)}
-                    className="btn !border-none bg-red-600 p-3  text-gray-200 hover:bg-red-600/80"
+                    disabled={isDeleting}
+                    className={`btn !border-none p-3 text-gray-200 hover:bg-red-600/80 ${
+                      isDeleting ? "bg-red-600/50" : "bg-red-600"
+                    }`}
                   >
                     {isDeleting ? <Spinner /> : <DeleteIcon />}
                   </button>
@@ -210,7 +212,6 @@ const TableThree = () => {
         </select>
       </div>
 
-      {/* Modals */}
       {isUploadModalOpen && (
         <ReusableModal
           onClose={closeUploadModal}

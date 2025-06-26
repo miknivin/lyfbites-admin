@@ -40,6 +40,7 @@
     "react-apexcharts": "^1.4.1",
     "react-dom": "^18",
     "react-hot-toast": "^2.5.2",
+    "react-quill": "^2.0.0",
     "react-quill-new": "^3.4.6",
     "react-redux": "^9.2.0",
     "sweetalert2": "^11.6.13",
