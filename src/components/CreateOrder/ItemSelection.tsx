@@ -32,7 +32,7 @@ const ItemsSelection: React.FC<ItemsSelectionProps> = ({
         name: item.name,
         price: item.offer ?? 0, // Ensure price is always a number
         image: item.images[0]?.url || "", // Ensure image is always a string
-        uploadedImage: "",
+  
         quantity: 1,
         product: item._id ?? "", // Ensure product is always a string
       })),

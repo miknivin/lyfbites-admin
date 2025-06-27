@@ -11,12 +11,12 @@ import Loader from "../common/Loader";
 
 const StepperApp = () => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [createProduct, { isLoading, error, isSuccess }] =
-    useCreateProductMutation();  const [product, setProduct] = useState<Product>({
+  const [createProduct, { isLoading, error, isSuccess }] = useCreateProductMutation();
+  const [product, setProduct] = useState<Product>({
     name: "",
-    details: { 
+    details: {
       ingredientsDescription: "",
-      additionalDescription: ""
+      additionalDescription: "",
     },
     ratings: 4, // Default from schema
     images: [],
@@ -24,11 +24,13 @@ const StepperApp = () => {
     variants: [{ size: "100g", actualPrice: 0, stock: 0 }], // Initialize with one variant
     numOfReviews: 0, // Default from schema
     reviews: [],
- category: ProductCategory.Banana,
+    category: ProductCategory.Banana,
     user: "" as any, // Temporary placeholder; update based on auth context
     createdAt: undefined,
     updatedAt: undefined,
+    offer: 0, // Added to satisfy Product interface
   });
+
   const nextStep = () => {
     if (currentStep < 3) setCurrentStep(currentStep + 1);
   };
@@ -62,17 +64,18 @@ const StepperApp = () => {
 
       setProduct({
         name: "",
-        details: { ingredientsDescription: "" },
+        details: { ingredientsDescription: "", additionalDescription: "" },
         ratings: 4,
         images: [],
         specifications: new Map(),
-        variants: [],
+        variants: [{ size: "100g", actualPrice: 0, stock: 0 }],
         numOfReviews: 0,
         reviews: [],
-     category: ProductCategory.Banana,
+        category: ProductCategory.Banana,
         user: "" as any,
         createdAt: undefined,
         updatedAt: undefined,
+        offer: 0, // Added to reset state
       });
       setCurrentStep(1);
     } catch (err) {

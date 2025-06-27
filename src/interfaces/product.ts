@@ -10,6 +10,7 @@ export enum ProductCategory {
   Main = "Main",
 }
 export interface Product {
+  offer: number;
   _id?: Types.ObjectId; // Optional, added by Mongoose
   name: string;  details: {
     ingredientsDescription: string;

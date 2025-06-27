@@ -15,7 +15,7 @@ export interface OrderItem {
   image: string;
   price: number;
   product: string | Types.ObjectId;
-  uploadedImage: string[];
+  
 }
 
 export interface PaymentInfo {
